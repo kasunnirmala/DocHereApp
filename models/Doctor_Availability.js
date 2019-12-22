@@ -9,7 +9,7 @@ module.exports = db.sequelize.define(
             primaryKey: true,
             autoIncrement: true,
         },
-        doctor_ID: { type: Sequelize.INTEGER, allowNull: false, references: { model: 'dotors', key: 'id' } },
+        doctor_ID: { type: Sequelize.INTEGER, allowNull: false, references: { model: 'doctors', key: 'id' } },
         nearby: Sequelize.BOOLEAN,
         call_available: Sequelize.BOOLEAN,
         home_visit: Sequelize.BOOLEAN
