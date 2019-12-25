@@ -26,6 +26,9 @@ dependencies:
   font_awesome_flutter: ^8.5.0
   curved_navigation_bar: ^0.3.1
   google_maps_flutter: ^0.5.21+8
+  adhara_socket_io: ^0.4.1
+  http: ^0.12.0+2
+  # geolocator: ^5.1.5
 
 dev_dependencies:
   flutter_test:
@@ -47,6 +50,7 @@ flutter:
   assets:
    - images/logo.png
    - images/logo2.png
+   - images/docloc.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.

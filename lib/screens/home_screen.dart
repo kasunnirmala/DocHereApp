@@ -12,11 +12,42 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen>
     with SingleTickerProviderStateMixin {
   TabController tabController;
+
+  // SocketIO socket;
+
   @override
   void initState() {
     super.initState();
+    // initSocket();
     tabController = TabController(vsync: this, length: 2);
+    
   }
+
+  // initSocket() async {
+  //   socket = await SocketIOManager()
+  //       .createInstance(SocketOptions('http://192.168.8.100:5000/'));
+  //   socket.onConnect((data) {
+  //     print("connected...");
+  //   });
+
+  //   socket.on("doc_loc_change", (data) {
+  //     print("DOC CHANGED");
+  //     getAllDoctors();
+  //   });
+
+  //   socket.connect();
+  // }
+
+  // getAllDoctors() async {
+  //   var url = "http://192.168.8.100:5000/doc_loc";
+
+  //   var response = await http.get(url);
+  //   if (response.statusCode == 200) {
+  //    print(response.body);
+  //   } else {
+  //     print("Request failed with status: ${response.statusCode}.");
+  //   }
+  // }
 
   @override
   void dispose() {
