@@ -1,3 +1,4 @@
+import 'package:dochere_client/screens/home_screen.dart';
 import 'package:dochere_client/util/app_data.dart';
 import 'package:flutter/material.dart';
 
@@ -7,7 +8,6 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -86,7 +86,12 @@ class _LoginState extends State<Login> {
                             fontWeight: FontWeight.w900),
                       ),
                       color: Colors.transparent,
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => HomeScreen()));
+                      },
                     ),
                   ),
                   SizedBox(
@@ -148,12 +153,12 @@ class BackgroundClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
     var path = Path();
-    path.lineTo(0,size.height-200);
+    path.lineTo(0, size.height - 200);
     path.lineTo(0, size.height);
     path.lineTo(100, size.height);
     path.lineTo(size.width, 400);
     path.lineTo(size.width, 0);
-    path.lineTo(0,size.height-50);
+    path.lineTo(0, size.height - 50);
     return path;
   }
 

@@ -1,3 +1,4 @@
+
 import 'package:dochere_client/screens/tabs/list_view_tab.dart';
 import 'package:dochere_client/screens/tabs/map_view_tab.dart';
 import 'package:dochere_client/util/bottomNavigator.dart';
@@ -5,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class HomeScreen extends StatefulWidget {
+ 
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
@@ -12,15 +14,11 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen>
     with SingleTickerProviderStateMixin {
   TabController tabController;
-
-  // SocketIO socket;
-
   @override
   void initState() {
     super.initState();
     // initSocket();
     tabController = TabController(vsync: this, length: 2);
-    
   }
 
   // initSocket() async {
@@ -88,7 +86,10 @@ class _HomeScreenState extends State<HomeScreen>
             flex: 16,
             child: TabBarView(
               children: <Widget>[
-                MapViewTab(),
+                FutureBuilder(
+                  builder: (context, projectSnap) {
+                  return MapViewTab();
+                }),
                 ListViewTab(),
               ],
               controller: tabController,

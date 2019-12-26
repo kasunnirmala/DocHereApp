@@ -2,7 +2,9 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:adhara_socket_io/adhara_socket_io.dart';
+import 'package:dochere_client/util/app_data.dart';
 import 'package:dochere_client/util/google_api.dart';
+import 'package:dochere_client/util/socket_singleton.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -10,31 +12,39 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 
 class MapViewTab extends StatefulWidget {
+  MapViewTab();
   @override
   _MapViewTabState createState() => _MapViewTabState();
 }
 
 class _MapViewTabState extends State<MapViewTab> {
-
-  String GAPI = "AIzaSyCXuyYr-XqPtazHh1flN-1Gp00tO0V7MwI";
+  _MapViewTabState();
   Map<PolylineId, Polyline> _polylines = <PolylineId, Polyline>{};
   Completer<GoogleMapController> _mapController = Completer();
   static final CameraPosition _kCurrentLocation = CameraPosition(
     target: LatLng(6.047242, 80.214869),
     zoom: 14.4746,
   );
-  // static CameraPosition _kCurrentLocation =
-  //     CameraPosition(target: LatLng(0, 0));
-
   Map<MarkerId, Marker> markers = <MarkerId, Marker>{};
-
-  SocketIO socket;
+var s1;
   BitmapDescriptor docIcon;
+  setSocket() async {
+   
+      (s1.socket).on("doc_loc_change", (data) {
+        print("DOC CHANGED");
+        getAllDoctors();
+      });
+    
+  }
 
   @override
   void initState() {
     super.initState();
-    initSocket();
+    
+     s1 = SocketSingleton();
+    super.initState();
+    setSocket();
+    print(s1.socket == null);
     getAllDoctors();
 
     BitmapDescriptor.fromAssetImage(
@@ -44,26 +54,9 @@ class _MapViewTabState extends State<MapViewTab> {
     });
   }
 
-  initSocket() async {
-    socket = await SocketIOManager()
-        .createInstance(SocketOptions('http://192.168.8.100:5000/'));
-    socket.onConnect((data) {
-      print("connected...");
-    });
-
-    socket.on("doc_loc_change", (data) {
-      print("DOC CHANGED");
-      getAllDoctors();
-    });
-
-    socket.connect();
-
-    /////////////////////////////////////
-
-    GoogleAPI googleapi =
-        GoogleAPI(origin: LatLng(5.6, 6.6), destination: LatLng(5.33, 6.99));
+  setMapRoute(LatLng origin, LatLng destination) async {
+    GoogleAPI googleapi = GoogleAPI(origin: origin, destination: destination);
     dynamic mapData = await googleapi.getLocationJSON();
-
 
     PolylineId id = PolylineId("poly");
     Polyline polyline = Polyline(
@@ -75,8 +68,6 @@ class _MapViewTabState extends State<MapViewTab> {
     setState(() {
       _polylines[id] = polyline;
     });
-
-    ///////////////////////////////////////////
   }
 
   getAllDoctors() async {
@@ -107,8 +98,11 @@ class _MapViewTabState extends State<MapViewTab> {
         lngAvg /= list.length;
 
         final CameraPosition _docTest =
-            CameraPosition(target: LatLng(latAvg, lngAvg), zoom: 10.0);
+            CameraPosition(target: LatLng(latAvg, lngAvg), zoom: 17.0);
         controller.animateCamera(CameraUpdate.newCameraPosition(_docTest));
+
+        setMapRoute(LatLng(list[0]['latitude'], list[0]['longitude']),
+            LatLng(6.046888, 80.214781));
       });
     } else {
       print("Request failed with status: ${response.statusCode}.");
