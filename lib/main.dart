@@ -1,7 +1,4 @@
-import 'package:adhara_socket_io/adhara_socket_io.dart';
-import 'package:dochere_client/screens/home_screen.dart';
 import 'package:dochere_client/screens/login.dart';
-import 'package:dochere_client/util/app_data.dart';
 import 'package:dochere_client/util/socket_singleton.dart';
 import 'package:flutter/material.dart';
 

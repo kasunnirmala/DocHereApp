@@ -1,13 +1,13 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:adhara_socket_io/adhara_socket_io.dart';
 import 'package:dochere_client/util/app_data.dart';
 import 'package:dochere_client/util/google_api.dart';
 import 'package:dochere_client/util/socket_singleton.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 
@@ -18,30 +18,38 @@ class MapViewTab extends StatefulWidget {
 }
 
 class _MapViewTabState extends State<MapViewTab> {
-  _MapViewTabState();
+  List<int> nearestDocIDs = List();
+  setCurrentPosition() async {
+    final GoogleMapController controller = await _mapController.future;
+    Position position = await Geolocator()
+        .getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+    final CameraPosition _currLoc = CameraPosition(
+        target: LatLng(position.latitude, position.longitude),
+        zoom: AppData.zoomLevel);
+    controller.animateCamera(CameraUpdate.newCameraPosition(_currLoc));
+  }
+
   Map<PolylineId, Polyline> _polylines = <PolylineId, Polyline>{};
   Completer<GoogleMapController> _mapController = Completer();
   static final CameraPosition _kCurrentLocation = CameraPosition(
     target: LatLng(6.047242, 80.214869),
-    zoom: 14.4746,
+    zoom: AppData.zoomLevel,
   );
   Map<MarkerId, Marker> markers = <MarkerId, Marker>{};
-var s1;
+  var s1;
   BitmapDescriptor docIcon;
   setSocket() async {
-   
-      (s1.socket).on("doc_loc_change", (data) {
-        print("DOC CHANGED");
-        getAllDoctors();
-      });
-    
+    (s1.socket).on("doc_loc_change", (data) {
+      print("DOC CHANGED");
+      getAllDoctors();
+    });
   }
 
   @override
   void initState() {
     super.initState();
-    
-     s1 = SocketSingleton();
+    setCurrentPosition();
+    s1 = SocketSingleton();
     super.initState();
     setSocket();
     print(s1.socket == null);
@@ -70,18 +78,33 @@ var s1;
     });
   }
 
-  getAllDoctors() async {
-    final GoogleMapController controller = await _mapController.future;
+  makeNearestDocList(
+      double lat, double lng, int docID, Position position) async {
+    double distanceInMeters = await Geolocator()
+        .distanceBetween(position.latitude, position.longitude, lat, lng);
+    print(distanceInMeters);
 
+    if (distanceInMeters <= 5000) {
+      nearestDocIDs.add(docID);
+    }
+  }
+
+  getAllDoctors() async {
     var url = "http://192.168.8.100:5000/doc_loc";
+
+    final GoogleMapController controller = await _mapController.future;
+    Position position = await Geolocator()
+        .getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+    final CameraPosition _currLoc = CameraPosition(
+        target: LatLng(position.latitude, position.longitude),
+        zoom: AppData.zoomLevel);
+    controller.animateCamera(CameraUpdate.newCameraPosition(_currLoc));
 
     var response = await http.get(url);
     if (response.statusCode == 200) {
       print(response.body);
 
       setState(() {
-        double latAvg = 0.0;
-        double lngAvg = 0.0;
         List<dynamic> list = json.decode(response.body);
         markers.clear();
         for (int i = 0; i < list.length; i++) {
@@ -91,18 +114,14 @@ var s1;
               position: LatLng(list[i]['latitude'], list[i]['longitude']),
               icon: docIcon,
               infoWindow: InfoWindow(title: id));
-          latAvg += list[i]['latitude'];
-          lngAvg += list[i]['longitude'];
+
+          makeNearestDocList(list[i]['latitude'], list[i]['longitude'],
+              list[i]['doctor_ID'], position);
         }
-        latAvg /= list.length;
-        lngAvg /= list.length;
 
-        final CameraPosition _docTest =
-            CameraPosition(target: LatLng(latAvg, lngAvg), zoom: 17.0);
-        controller.animateCamera(CameraUpdate.newCameraPosition(_docTest));
-
-        setMapRoute(LatLng(list[0]['latitude'], list[0]['longitude']),
-            LatLng(6.046888, 80.214781));
+        print(nearestDocIDs.length);
+        // setMapRoute(LatLng(list[0]['latitude'], list[0]['longitude']),
+        //     LatLng(6.046888, 80.214781));
       });
     } else {
       print("Request failed with status: ${response.statusCode}.");

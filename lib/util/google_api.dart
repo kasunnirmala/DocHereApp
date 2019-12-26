@@ -11,10 +11,10 @@ class GoogleAPI {
   String googleAPI = "AIzaSyCXuyYr-XqPtazHh1flN-1Gp00tO0V7MwI";
 
   Future<Map<String, dynamic>> getLocationJSON() async {
-    String URL =
+    String url =
         "https://maps.googleapis.com/maps/api/directions/json?origin=${origin.latitude},${origin.longitude}&destination=${destination.latitude},${destination.longitude}&key=$googleAPI";
     Map<String, dynamic> mapData = Map();
-    var response = await http.get(URL);
+    var response = await http.get(url);
     if (response.statusCode == 200) {
       // print(response.body);
       dynamic body = json.decode(response.body);
